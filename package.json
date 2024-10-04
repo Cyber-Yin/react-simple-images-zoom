@@ -1,0 +1,31 @@
+{
+  "name": "react-simple-images-zoom",
+  "version": "1.0.0",
+  "description": "A simple image zoom component for React",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "CyberYin <cyberyin.me@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cyber-Yin/react-simple-images-zoom.git"
+  },
+  "keywords": [
+    "react",
+    "image",
+    "zoom",
+    "component"
+  ],
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.2"
+  }
+}
