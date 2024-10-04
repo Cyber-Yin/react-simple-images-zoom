@@ -2,7 +2,13 @@
   "name": "react-simple-images-zoom",
   "version": "1.0.0",
   "description": "A simple image zoom component for React",
-  "main": "index.js",
+  "type": "module",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "license": "MIT",
   "author": "CyberYin <cyberyin.me@gmail.com>",
   "repository": {
@@ -15,17 +21,25 @@
     "zoom",
     "component"
   ],
+  "scripts": {
+    "dev": "vite -c vite.demo.config.ts",
+    "build": "vite build -c vite.config.ts"
+  },
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^22.7.4",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
     "prettier": "^3.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8",
+    "vite-plugin-dts": "^4.2.3"
   }
 }
