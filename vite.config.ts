@@ -29,7 +29,7 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "ReactSimpleImagesZoom",
-      formats: ["es", "cjs"],
+      formats: ["es"],
       fileName: (format) => `index.${format === "es" ? "esm" : format}.js`,
     },
     rollupOptions: {

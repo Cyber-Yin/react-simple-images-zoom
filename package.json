@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "A simple image zoom component for React",
   "type": "module",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
