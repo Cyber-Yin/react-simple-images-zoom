@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
+import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
@@ -8,8 +9,10 @@ export default defineConfig({
     react(),
     dts({
       insertTypesEntry: true,
+      rollupTypes: true,
       include: ["src"],
     }),
+    cssInjectedByJsPlugin(),
   ],
   resolve: {
     alias: {
@@ -22,6 +25,7 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: false,
+    cssCodeSplit: false,
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "ReactSimpleImagesZoom",

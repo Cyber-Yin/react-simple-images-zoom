@@ -1,14 +1,13 @@
 {
   "singleAttributePerLine": true,
   "endOfLine": "lf",
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports"
-  ],
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": [
     "<THIRD_PARTY_MODULES>",
-    "^@/lib/(.*)$",
-    "^@/server/(.*)$",
     "^@/components/(.*)$",
+    "^@/context/(.*)$",
+    "^@/hooks/(.*)$",
+    "^@/types/(.*)$",
     "^@/(.*)$",
     "^[./]"
   ],
