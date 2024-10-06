@@ -54,16 +54,19 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
 
     const windowHeight = window.innerHeight;
     const windowWidth = window.innerWidth;
-    const imageHeight = currentClickImage.naturalWidth;
-    const imageWidth = currentClickImage.naturalHeight;
+    const imageHeight = currentClickImage.naturalHeight;
+    const imageWidth = currentClickImage.naturalWidth;
+
+    const targetHeight = windowHeight * 0.8;
+    const targetWidth = windowWidth * 0.8;
 
     const isImageTooBig =
-      imageHeight > windowHeight * 0.8 || imageWidth > windowWidth * 0.8;
+      imageHeight > targetHeight || imageWidth > targetWidth;
 
     if (isImageTooBig) {
       const scale = Math.min(
-        (windowHeight / imageHeight) * 0.8,
-        (windowWidth / imageWidth) * 0.8,
+        targetHeight / imageHeight,
+        targetWidth / imageWidth,
       );
 
       setInitialScale(scale);
