@@ -260,10 +260,7 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
           onMouseDown={handleMouseDown}
           onWheel={handleWheel}
           {...imageProps}
-          className={
-            currentClickImage.className +
-            (imageProps?.className ? ` ${imageProps?.className}` : "")
-          }
+          className={imageProps?.className ? ` ${imageProps?.className}` : ""}
           style={{
             transform: `translate(${imagePosition.x}px, ${imagePosition.y}px) scale(${imageScale}) rotate(${imageRotate}deg)`,
             transition: `transform ${imageTransformDuration}ms`,
