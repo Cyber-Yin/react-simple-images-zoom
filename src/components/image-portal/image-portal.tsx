@@ -52,11 +52,10 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
 
     lockBodyScroll();
 
-    const imageRect = currentClickImage.getBoundingClientRect();
     const windowHeight = window.innerHeight;
     const windowWidth = window.innerWidth;
-    const imageHeight = imageRect.height;
-    const imageWidth = imageRect.width;
+    const imageHeight = currentClickImage.naturalWidth;
+    const imageWidth = currentClickImage.naturalHeight;
 
     const isImageTooBig =
       imageHeight > windowHeight * 0.8 || imageWidth > windowWidth * 0.8;
