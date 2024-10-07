@@ -15,7 +15,7 @@
 
 - 🚀 Fast and easy to use
 - 🏭 Light, without external dependencies
-- 💎 Desktop mouse events support
+- 💎 Mobile gestures and desktop mouse events support
 - 🔧 Highly customizable
 
 ## Installation
@@ -166,14 +166,14 @@ interface CustomProps {
   imageTransformDuration?: number;
 
   /**
-   * @description image max zoom, default is 2
+   * @description image inside portal min width, default is 200px, used for zooming
    */
-  maxZoom?: number;
+  minPortalImageWidth?: number;
 
   /**
-   * @description image min zoom, default is 0.2
+   * @description image inside portal max width, default is 10000px, used for zooming
    */
-  minZoom?: number;
+  maxPortalImageWidth?: number;
 
   /**
    * @description image portal props

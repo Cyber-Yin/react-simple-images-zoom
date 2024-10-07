@@ -4,11 +4,11 @@ import { useCallback, useEffect, useState } from "react";
  * @description image transform methods
  */
 export const useImageTransform = (props: {
-  scale: {
-    min: number;
-    max: number;
-  };
   initialScale: number;
+  minPortalImageWidth: number;
+  maxPortalImageWidth: number;
+  portalImageNaturalWidth: number;
+  portalImageNaturalHeight: number;
 }) => {
   const [scale, setScale] = useState(props.initialScale);
   // image position used for smooth scale transform
@@ -24,23 +24,50 @@ export const useImageTransform = (props: {
         setScale((prevScale) => {
           const newScale = prevScale + value;
 
-          const clampedValue = Math.min(
-            Math.max(newScale, props.scale.min),
-            props.scale.max,
-          );
+          // get new image size
+          const newImageSize = {
+            width: props.portalImageNaturalWidth * newScale,
+            height: props.portalImageNaturalHeight * newScale,
+          };
 
-          return clampedValue;
+          if (newImageSize.width < props.minPortalImageWidth) {
+            // if new image size is smaller than min portal image width, set scale to min portal image width
+            return props.minPortalImageWidth / props.portalImageNaturalWidth;
+          } else if (newImageSize.width > props.maxPortalImageWidth) {
+            // if new image size is larger than max portal image width, set scale to max portal image width
+            return props.maxPortalImageWidth / props.portalImageNaturalWidth;
+          }
+
+          // if new image size is within the range, set scale to new scale
+          return newScale;
         });
       } else {
-        const clampedValue = Math.min(
-          Math.max(value, props.scale.min),
-          props.scale.max,
-        );
+        const newScale = value;
 
-        setScale(clampedValue);
+        // get new image size
+        const newImageSize = {
+          width: props.portalImageNaturalWidth * newScale,
+          height: props.portalImageNaturalHeight * newScale,
+        };
+
+        if (newImageSize.width < props.minPortalImageWidth) {
+          // if new image size is smaller than min portal image width, set scale to min portal image width
+          setScale(props.minPortalImageWidth / props.portalImageNaturalWidth);
+        } else if (newImageSize.width > props.maxPortalImageWidth) {
+          // if new image size is larger than max portal image width, set scale to max portal image width
+          setScale(props.maxPortalImageWidth / props.portalImageNaturalWidth);
+        } else {
+          // if new image size is within the range, set scale to new scale
+          setScale(value);
+        }
       }
     },
-    [props.scale.min, props.scale.max],
+    [
+      props.minPortalImageWidth,
+      props.maxPortalImageWidth,
+      props.portalImageNaturalWidth,
+      props.portalImageNaturalHeight,
+    ],
   );
 
   const transformImagePosition = useCallback(

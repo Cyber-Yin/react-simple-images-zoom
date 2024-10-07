@@ -27,14 +27,14 @@ export interface CustomProps {
   imageTransformDuration?: number;
 
   /**
-   * @description image max zoom, default is 2
+   * @description image portal min width, default is 200px
    */
-  maxZoom?: number;
+  minPortalImageWidth?: number;
 
   /**
-   * @description image min zoom, default is 0.2
+   * @description image portal max width, default is 10000px
    */
-  minZoom?: number;
+  maxPortalImageWidth?: number;
 
   /**
    * @description image portal props

@@ -18,16 +18,22 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
   portalProps,
   wrapperProps,
   imageProps,
-  maxZoom = 2,
-  minZoom = 0.2,
+  minPortalImageWidth = 200,
+  maxPortalImageWidth = 10000,
   customControls,
   customControlClassName,
 }) => {
   const { lockBodyScroll, unlockBodyScroll } = useLockBodyScroll();
 
   const [enterAnimationCompleted, setEnterAnimationCompleted] = useState(false);
-
   const [initialScale, setInitialScale] = useState(1);
+  const [
+    portalImageNaturalWidthAndHeight,
+    setPortalImageNaturalWidthAndHeight,
+  ] = useState({
+    width: 0,
+    height: 0,
+  });
 
   const {
     imageScale,
@@ -40,11 +46,11 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
     transformWrapperPosition,
     resetImageTransform,
   } = useImageTransform({
-    scale: {
-      min: minZoom,
-      max: maxZoom,
-    },
     initialScale,
+    minPortalImageWidth,
+    maxPortalImageWidth,
+    portalImageNaturalWidth: portalImageNaturalWidthAndHeight.width,
+    portalImageNaturalHeight: portalImageNaturalWidthAndHeight.height,
   });
 
   useEffect(() => {
@@ -57,8 +63,16 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
     const imageHeight = currentClickImage.naturalHeight;
     const imageWidth = currentClickImage.naturalWidth;
 
+    setPortalImageNaturalWidthAndHeight({
+      width: imageWidth,
+      height: imageHeight,
+    });
+
     const targetHeight = windowHeight * 0.8;
-    const targetWidth = windowWidth * 0.8;
+    const targetWidth =
+      windowWidth * 0.8 > minPortalImageWidth
+        ? windowWidth * 0.8
+        : minPortalImageWidth;
 
     const isImageTooBig =
       imageHeight > targetHeight || imageWidth > targetWidth;
@@ -79,9 +93,14 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
 
   const isDragging = useRef(false);
   const lastPosition = useRef({ x: 0, y: 0 });
+  const touchStartDistance = useRef<number | null>(null);
 
   const imgElement = useRef<HTMLImageElement | null>(null);
 
+  /**
+   * delay close portal
+   * @returns void
+   */
   const delayClosePortal = useCallback(() => {
     setEnterAnimationCompleted(false);
 
@@ -92,6 +111,11 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
     }, portalAnimationDuration);
   }, [onClose, portalAnimationDuration, resetImageTransform]);
 
+  /**
+   * handle desktop mouse wheel event
+   * @param e - wheel event
+   * @returns void
+   */
   const handleWheel = useCallback(
     (e: React.WheelEvent<HTMLImageElement>) => {
       if (!imgElement.current) return;
@@ -119,18 +143,28 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
       };
 
       // get new scale
-      const newScale = imageScale * (e.deltaY > 0 ? 0.9 : 1.1);
-      const clampedScale = Math.min(Math.max(newScale, minZoom), maxZoom);
-
-      if (clampedScale === maxZoom || clampedScale === minZoom) {
-        return;
-      }
+      let newScale = imageScale * (e.deltaY > 0 ? 0.9 : 1.1);
 
       // get new image size
       const newImageSize = {
-        width: image.offsetWidth * clampedScale,
-        height: image.offsetHeight * clampedScale,
+        width: image.offsetWidth * newScale,
+        height: image.offsetHeight * newScale,
       };
+
+      // if new image size is smaller than min portal image width or larger than max portal image width, adjust the scale
+      if (
+        newImageSize.width < minPortalImageWidth ||
+        newImageSize.width > maxPortalImageWidth
+      ) {
+        if (newImageSize.width < minPortalImageWidth) {
+          newScale = minPortalImageWidth / image.offsetWidth;
+        } else {
+          newScale = maxPortalImageWidth / image.offsetWidth;
+        }
+
+        newImageSize.width = image.offsetWidth * newScale;
+        newImageSize.height = image.offsetHeight * newScale;
+      }
 
       // get image size diff
       const imageSizeDiff = {
@@ -147,15 +181,30 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
       transformImagePosition(transformPosition, "increment");
       transformImageScale(newScale);
     },
-    [imageScale, minZoom, maxZoom, transformImagePosition, transformImageScale],
+    [
+      imageScale,
+      minPortalImageWidth,
+      maxPortalImageWidth,
+      transformImagePosition,
+      transformImageScale,
+    ],
   );
 
+  /**
+   * handle desktop mouse down event
+   * @param e - mouse down event
+   * @returns void
+   */
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
     isDragging.current = true;
     lastPosition.current = { x: e.clientX, y: e.clientY };
   }, []);
 
+  /**
+   * handle desktop mouse move event
+   * @param e - mouse move event
+   * @returns void
+   */
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging.current) return;
     const dx = e.clientX - lastPosition.current.x;
@@ -164,22 +213,118 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
     lastPosition.current = { x: e.clientX, y: e.clientY };
   }, []);
 
+  /**
+   * handle desktop mouse up event
+   * @returns void
+   */
   const handleMouseUp = useCallback(() => {
     isDragging.current = false;
   }, []);
 
-  useEffect(() => {
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [handleMouseUp]);
+  /**
+   * handle mobile touch start event
+   * @param e - touch start event
+   * @returns void
+   */
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      isDragging.current = true;
+      lastPosition.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    } else if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      touchStartDistance.current = distance;
+    }
+  }, []);
+
+  /**
+   * handle mobile touch move event
+   * @param e - touch move event
+   * @returns void
+   */
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 1 && isDragging.current) {
+        // move wrapper
+        const dx = e.touches[0].clientX - lastPosition.current.x;
+        const dy = e.touches[0].clientY - lastPosition.current.y;
+        transformWrapperPosition({ x: dx, y: dy }, "increment");
+        lastPosition.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
+      } else if (
+        e.touches.length === 2 &&
+        touchStartDistance.current !== null &&
+        imgElement.current
+      ) {
+        // zoom image
+        const image = imgElement.current;
+
+        const newDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY,
+        );
+        const scale = newDistance / touchStartDistance.current;
+        let newScale = imageScale * scale;
+
+        const newImageSize = {
+          width: image.offsetWidth * newScale,
+          height: image.offsetHeight * newScale,
+        };
+
+        if (
+          newImageSize.width < minPortalImageWidth ||
+          newImageSize.width > maxPortalImageWidth
+        ) {
+          if (newImageSize.width < minPortalImageWidth) {
+            newScale = minPortalImageWidth / image.offsetWidth;
+          } else {
+            newScale = maxPortalImageWidth / image.offsetWidth;
+          }
+
+          newImageSize.width = image.offsetWidth * newScale;
+          newImageSize.height = image.offsetHeight * newScale;
+        }
+
+        if (newScale !== imageScale) {
+          transformImageScale(newScale);
+        }
+
+        touchStartDistance.current = newDistance;
+      }
+
+      // prevent default touch event
+      return false;
+    },
+    [
+      imageScale,
+      minPortalImageWidth,
+      maxPortalImageWidth,
+      touchStartDistance,
+      transformWrapperPosition,
+      transformImageScale,
+    ],
+  );
+
+  /**
+   * handle mobile touch end event
+   * @returns void
+   */
+  const handleTouchEnd = useCallback(() => {
+    isDragging.current = false;
+    touchStartDistance.current = null;
+  }, []);
 
   if (!currentClickImage) return null;
 
   return createPortal(
     <div
-      onMouseMove={handleMouseMove}
       onClick={delayClosePortal}
       {...portalProps}
       className={`image-portal ${enterAnimationCompleted ? "enter" : "exit"}${portalProps?.className ? ` ${portalProps.className}` : ""}`}
@@ -260,6 +405,12 @@ export const ImagePortal: React.FC<ImagePortalProps> = ({
           draggable={false}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
           onWheel={handleWheel}
           {...imageProps}
           className={imageProps?.className ? ` ${imageProps?.className}` : ""}

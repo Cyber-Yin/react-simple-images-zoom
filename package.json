@@ -21,7 +21,7 @@
     "component"
   ],
   "scripts": {
-    "dev": "vite -c vite.demo.config.ts",
+    "dev": "vite -c vite.demo.config.ts --host",
     "build": "vite build -c vite.config.ts"
   },
   "peerDependencies": {
