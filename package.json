@@ -1,6 +1,6 @@
 {
   "name": "react-simple-images-zoom",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A simple image zoom component for React",
   "type": "module",
   "main": "./dist/index.esm.js",
